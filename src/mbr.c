@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
 	error = readFile(argv[1]);
 	
 	if (!error) {
-		fprintf(stderr, "Failed to read file\n");
+		fprintf(stderr, "Failed to read file: %s\n", argv[1]);
 		return 1;
 	}
 	
@@ -105,8 +105,12 @@ _u8 readFile(_u8 *filename) {
 	
 	while (rbytes < MBRSZ) {
 		n = read(fd, mbrbytes+rbytes, MBRSZ - rbytes);
-		printf("read %d\n", n);
 		rbytes += n;
+
+		if(n == 0 && rbytes < MBRSZ) {
+			perror("Failed to read mbr\n");
+			return 0;
+		}
 	}
 	
 	printf("file end: %02x%02x\n", mbrbytes[510], mbrbytes[511]);
